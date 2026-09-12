@@ -24,6 +24,7 @@ O botao **VER** mostra a senha digitada e **OCULTAR** esconde.
   DESLIGAR para voltar ao normal.
 - Fechar a janela do programa tambem restaura o Discord sozinho.
 - Se nada resolver, avise o Pedro.
+- Emergências (tudo caiu, Discord não abre): ver `CONTINGENCIA.md`.
 
 ## Para usar em outro computador
 
