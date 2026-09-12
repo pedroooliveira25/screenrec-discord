@@ -38,6 +38,8 @@ O botao **VER** mostra a senha digitada e **OCULTAR** esconde.
 
 ## Importante
 
+- Se a sala não responder em 30 segundos (2 tentativas), o programa troca
+  sozinho para outra sala válida e avisa na tela.
 - Chamadas de voz continuam normais (a sala muda so o resto do Discord).
 - Nao apague os arquivos e pastas daqui de dentro: o programa precisa
   deles para funcionar.

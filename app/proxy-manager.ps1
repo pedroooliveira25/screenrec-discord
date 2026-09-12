@@ -7,6 +7,9 @@ $StateFile = Join-Path $RootDir ".state.json"
 $ConfigFile = Join-Path $RootDir "config\regions.json"
 $AuthFile = Join-Path $RootDir ".auth.json"
 $RelayPort = 18081
+$ProxyTimeoutSec = 30
+$ProxyMaxRetries = 2
+$ProxyTestUrl = "http://ip-api.com/json/?fields=status,query"
 
 function Get-Regions {
     if (-not (Test-Path -LiteralPath $ConfigFile)) { throw "Config não achada: $ConfigFile" }
@@ -153,16 +156,38 @@ function Stop-AuthRelay {
     } catch { }
 }
 
+function Test-LaunchUrl([string]$LaunchUrl) {
+    try {
+        $t = Invoke-WebRequest -Uri $ProxyTestUrl -Proxy $LaunchUrl -TimeoutSec $ProxyTimeoutSec -UseBasicParsing | ConvertFrom-Json
+        return ($t.status -eq "success" -and $t.query)
+    } catch { return $false }
+}
+
 function Start-RegionProxy {
     param([Parameter(Mandatory=$true)][string]$Regiao, [switch]$SystemWide, [string]$Pass = "")
-    $proxy = Get-RegionProxy $Regiao
-    $launch = $proxy
-    $user = Get-RegionUser $Regiao
-    if ($user -ne "" -and $Pass -ne "") { $launch = Start-AuthRelay $proxy $user $Pass }
-    Start-DiscordWithProxy $launch
-    if ($SystemWide) { Set-SystemProxy $proxy }
-    Save-State $Regiao $proxy
-    return $proxy
+    $regions = @(Get-Regions)
+    $first = $regions | Where-Object { $_.nome -eq $Regiao } | Select-Object -First 1
+    if (-not $first) { throw "Região '$Regiao' não cadastrada em config/regions.json" }
+    $ordered = @($first) + @($regions | Where-Object { $_.nome -ne $Regiao })
+    foreach ($cand in $ordered) {
+        $proxy = [string]$cand.proxy
+        $user = ""
+        if ($cand.usuario) { $user = [string]$cand.usuario }
+        for ($try = 1; $try -le $ProxyMaxRetries; $try++) {
+            Stop-AuthRelay
+            $launch = $proxy
+            if ($user -ne "" -and $Pass -ne "") { $launch = Start-AuthRelay $proxy $user $Pass }
+            if (Test-LaunchUrl $launch) {
+                # O relay de teste continua no ar: o Discord usa ele direto.
+                Start-DiscordWithProxy $launch
+                if ($SystemWide) { Set-SystemProxy $proxy }
+                Save-State ([string]$cand.nome) $proxy
+                return @{ Regiao = [string]$cand.nome; Proxy = $proxy; Trocou = ([string]$cand.nome -ne $Regiao) }
+            }
+        }
+        Stop-AuthRelay
+    }
+    throw "Nenhum proxy respondeu em ${ProxyTimeoutSec}s (${ProxyMaxRetries}x cada). Adicione um reserva em config/regions.json."
 }
 
 function Stop-RegionProxy {

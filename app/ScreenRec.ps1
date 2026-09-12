@@ -361,7 +361,11 @@ $btnOn.Add_Click({
         if ($chkSave.Checked -and $pw -ne "") { Save-Auth $nome $pw }
         elseif (-not $chkSave.Checked) { Clear-Auth $nome }
         $p = Start-RegionProxy -Regiao $nome -Pass $pw
-        Set-Status ("ATIVO - " + $nome + " (" + $p + "). Discord reiniciado com proxy.") "verde"
+        $rNome = $nome; $rProxy = [string]$p
+        if ($p -is [hashtable] -and $p.ContainsKey("Regiao")) { $rNome = [string]$p.Regiao; $rProxy = [string]$p.Proxy }
+        $msg = ("ATIVO - " + $rNome + " (" + $rProxy + "). Discord reiniciado com proxy.")
+        if ($p -is [hashtable] -and $p.Trocou) { $msg = ("ATIVO - " + $rNome + " (" + $rProxy + "). O '" + $nome + "' não respondeu em 30s, troquei sozinho.") }
+        Set-Status $msg "verde"
     } catch {
         Set-Status ("Erro: " + $_.Exception.Message) "vermelho"
     } finally {
