@@ -36,6 +36,13 @@ O botao **VER** mostra a senha digitada e **OCULTAR** esconde.
    Requisitos: Windows 10/11, Discord instalado, sem precisar de admin.
 4. Digite a senha uma vez com **Salvar senha** marcado e pronto.
 
+## Atalho com ícone (quem clonou do GitHub)
+
+O `ScreenRec.lnk` do repositório não funciona em outro PC (caminho
+absoluto). Depois de clonar, dê duplo clique no **`Criar-Atalho.bat`** —
+ele gera o `ScreenRec.lnk` com os caminhos dessa máquina + ícone roxo.
+A partir daí use o atalho normalmente.
+
 ## Importante
 
 - Se a sala não responder em 30 segundos (2 tentativas), o programa troca
