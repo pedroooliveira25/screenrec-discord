@@ -2,8 +2,8 @@
   "regioes": [
     {
       "nome": "reserva1",
-      "proxy": "http://34.69.61.247:80",
-      "descricao": "Reserva EUA (publico, pode cair)."
+      "proxy": "http://37.59.125.131:8888",
+      "descricao": "Reserva França (publico, pode cair)."
     },
     {
       "nome": "reserva2",
