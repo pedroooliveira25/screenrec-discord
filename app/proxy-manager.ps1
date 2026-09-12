@@ -7,7 +7,7 @@ $StateFile = Join-Path $RootDir ".state.json"
 $ConfigFile = Join-Path $RootDir "config\regions.json"
 $AuthFile = Join-Path $RootDir ".auth.json"
 $RelayPort = 18081
-$ProxyTimeoutSec = 30
+$ProxyTimeoutSec = 60
 $ProxyMaxRetries = 2
 $ProxyTestUrl = "http://ip-api.com/json/?fields=status,query"
 

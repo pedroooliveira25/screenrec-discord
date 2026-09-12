@@ -364,7 +364,7 @@ $btnOn.Add_Click({
         $rNome = $nome; $rProxy = [string]$p
         if ($p -is [hashtable] -and $p.ContainsKey("Regiao")) { $rNome = [string]$p.Regiao; $rProxy = [string]$p.Proxy }
         $msg = ("ATIVO - " + $rNome + " (" + $rProxy + "). Discord reiniciado com proxy.")
-        if ($p -is [hashtable] -and $p.Trocou) { $msg = ("ATIVO - " + $rNome + " (" + $rProxy + "). O '" + $nome + "' não respondeu em 30s, troquei sozinho.") }
+        if ($p -is [hashtable] -and $p.Trocou) { $msg = ("ATIVO - " + $rNome + " (" + $rProxy + "). O '" + $nome + "' não respondeu em " + $ProxyTimeoutSec + "s, troquei sozinho.") }
         Set-Status $msg "verde"
     } catch {
         Set-Status ("Erro: " + $_.Exception.Message) "vermelho"

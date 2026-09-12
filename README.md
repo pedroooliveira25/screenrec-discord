@@ -45,7 +45,7 @@ A partir daí use o atalho normalmente.
 
 ## Importante
 
-- Se a sala não responder em 30 segundos (2 tentativas), o programa troca
+- Se a sala não responder em 60 segundos (2 tentativas), o programa troca
   sozinho para outra sala válida e avisa na tela.
 - Com o app aberto, ele testa a sala a cada 1 minuto: se cair 2 vezes
   seguidas, recarrega sozinho (desmarque "Recarregar sozinho" para desligar).
