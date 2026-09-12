@@ -7,7 +7,7 @@
     },
     {
       "nome": "reserva2",
-      "proxy": "http://107.167.18.122:443",
+      "proxy": "http://67.203.23.88:8081",
       "descricao": "Reserva EUA (publico, pode cair)."
     },
     {
