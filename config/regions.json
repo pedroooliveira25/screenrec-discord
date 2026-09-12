@@ -1,0 +1,10 @@
+{
+  "regioes": [
+    {
+      "nome": "pathbit",
+      "proxy": "http://45.86.245.81:8080",
+      "usuario": "universal",
+      "descricao": "Sala oficial. Funcionando no Discord."
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+# Máquina-local: nunca versionar
+.auth.json
+.state.json
+.sysproxy-backup.json
+erro.log
+ScreenRec.lnk
