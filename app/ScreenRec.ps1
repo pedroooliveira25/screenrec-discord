@@ -394,11 +394,54 @@ $lblHint.Location = New-Object System.Drawing.Point(28, 494)
 $lblHint.AutoSize = $true
 $form.Controls.Add($lblHint)
 
+$chkAuto = New-Object System.Windows.Forms.CheckBox
+$chkAuto.Text = "Recarregar sozinho se a sala cair"
+$chkAuto.Font = New-Object System.Drawing.Font("Segoe UI", 8)
+$chkAuto.ForeColor = $CINZA
+$chkAuto.BackColor = $BG
+$chkAuto.Location = New-Object System.Drawing.Point(28, 512)
+$chkAuto.Size = New-Object System.Drawing.Size(260, 20)
+$chkAuto.Checked = $true
+$form.Controls.Add($chkAuto)
+
+# Monitor: a cada 60s testa a sala ativa; 2 falhas seguidas = troca sozinho.
+$script:monFails = 0
+$monTimer = New-Object System.Windows.Forms.Timer
+$monTimer.Interval = 60000
+$monTimer.Add_Tick({
+    if (-not $chkAuto.Checked) { $script:monFails = 0; return }
+    try {
+        $st = Get-State
+        if (-not $st -or -not $st.ativo) { $script:monFails = 0; return }
+        if (Test-ActiveProxy 15) { $script:monFails = 0; return }
+        $script:monFails++
+        if ($script:monFails -lt 2) { return }
+        $script:monFails = 0
+        $monTimer.Stop()
+        Show-Loading $true
+        try {
+            $regAtiva = [string]$st.regiao
+            $pw2 = Get-AuthPass $regAtiva
+            if ($pw2 -eq "" -and [string]$combo.SelectedItem -eq $regAtiva) { $pw2 = $txtPass.Text }
+            $res = Start-RegionProxy -Regiao $regAtiva -Pass $pw2
+            $rn = $regAtiva; $rp = ""
+            if ($res -is [hashtable]) { $rn = [string]$res.Regiao; $rp = [string]$res.Proxy }
+            $idx = $combo.Items.IndexOf($rn)
+            if ($idx -ge 0) { $combo.SelectedIndex = $idx }
+            Refresh-Auth
+            Set-Status ("Recarregado sozinho - " + $rn + " (" + $rp + ").") "verde"
+        } catch {
+            Set-Status ("Sala caiu e a troca automática falhou: " + $_.Exception.Message) "vermelho"
+        } finally { Show-Loading $false; $monTimer.Start() }
+    } catch { }
+})
+$monTimer.Start()
+
 $lblFoot = New-Object System.Windows.Forms.Label
 $lblFoot.Text = "pathbit.com.br"
 $lblFoot.Font = New-Object System.Drawing.Font("Segoe UI", 8)
 $lblFoot.ForeColor = $ROXOHOV
-$lblFoot.Location = New-Object System.Drawing.Point(28, 514)
+$lblFoot.Location = New-Object System.Drawing.Point(28, 534)
 $lblFoot.AutoSize = $true
 $form.Controls.Add($lblFoot)
 

@@ -47,6 +47,8 @@ A partir daí use o atalho normalmente.
 
 - Se a sala não responder em 30 segundos (2 tentativas), o programa troca
   sozinho para outra sala válida e avisa na tela.
+- Com o app aberto, ele testa a sala a cada 1 minuto: se cair 2 vezes
+  seguidas, recarrega sozinho (desmarque "Recarregar sozinho" para desligar).
 - Chamadas de voz continuam normais (a sala muda so o resto do Discord).
 - Nao apague os arquivos e pastas daqui de dentro: o programa precisa
   deles para funcionar.

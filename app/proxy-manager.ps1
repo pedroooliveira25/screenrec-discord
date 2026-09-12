@@ -156,9 +156,26 @@ function Stop-AuthRelay {
     } catch { }
 }
 
-function Test-LaunchUrl([string]$LaunchUrl) {
+function Test-LaunchUrl([string]$LaunchUrl, [int]$TimeoutSec = 0) {
+    if ($TimeoutSec -le 0) { $TimeoutSec = $ProxyTimeoutSec }
     try {
-        $t = Invoke-WebRequest -Uri $ProxyTestUrl -Proxy $LaunchUrl -TimeoutSec $ProxyTimeoutSec -UseBasicParsing | ConvertFrom-Json
+        $t = Invoke-WebRequest -Uri $ProxyTestUrl -Proxy $LaunchUrl -TimeoutSec $TimeoutSec -UseBasicParsing | ConvertFrom-Json
+        return ($t.status -eq "success" -and $t.query)
+    } catch { return $false }
+}
+
+# Monitor: testa a sala ATIVA (via relay local se tem auth). $true = tudo bem.
+function Test-ActiveProxy([int]$TimeoutSec = 15) {
+    $st = Get-State
+    if (-not $st -or -not $st.ativo) { return $true }
+    $r = (Get-Regions) | Where-Object { $_.nome -eq ([string]$st.regiao) } | Select-Object -First 1
+    if (-not $r) { return $false }
+    $user = ""
+    if ($r.usuario) { $user = [string]$r.usuario }
+    $launch = [string]$r.proxy
+    if ($user -ne "") { $launch = ("http://127.0.0.1:" + $RelayPort) }
+    try {
+        $t = Invoke-WebRequest -Uri $ProxyTestUrl -Proxy $launch -TimeoutSec $TimeoutSec -UseBasicParsing | ConvertFrom-Json
         return ($t.status -eq "success" -and $t.query)
     } catch { return $false }
 }
