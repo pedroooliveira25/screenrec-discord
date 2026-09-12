@@ -6,7 +6,7 @@ Programa que muda a sala do seu Discord.
 
 1. Abra pelo **Abrir-ScreenRec.bat** (neste PC vale também o
    atalho **ScreenRec** de ícone roxo com a letra S).
-2. Confira se a sala **pathbit** esta selecionada.
+2. Confira se a sala **reserva1** esta selecionada (é a mais rápida).
 3. Clique em **LIGAR SALA** e aguarde a barrinha verde terminar.
    O Discord fecha e abre sozinho ja dentro da sala.
 4. Quando terminar, clique em **DESLIGAR**.

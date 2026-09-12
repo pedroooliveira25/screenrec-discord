@@ -165,7 +165,7 @@ try {
         [void]$combo.Items.Add($it.nome)
         $regionInfo[$it.nome] = [string]$it.descricao + "  (" + [string]$it.proxy + ")"
     }
-    $def = $combo.Items.IndexOf("pathbit")
+    $def = $combo.Items.IndexOf("reserva1")
     if ($def -ge 0) { $combo.SelectedIndex = $def }
     elseif ($combo.Items.Count -gt 0) { $combo.SelectedIndex = 0 }
 } catch {

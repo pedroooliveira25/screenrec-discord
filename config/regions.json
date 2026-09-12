@@ -1,12 +1,6 @@
 {
   "regioes": [
     {
-      "nome": "pathbit",
-      "proxy": "http://45.86.245.81:8080",
-      "usuario": "universal",
-      "descricao": "Sala oficial (fora do ar, failover automatico p/ reservas)."
-    },
-    {
       "nome": "reserva1",
       "proxy": "http://34.69.61.247:80",
       "descricao": "Reserva EUA (publico, pode cair)."
@@ -15,6 +9,12 @@
       "nome": "reserva2",
       "proxy": "http://165.154.162.73:8888",
       "descricao": "Reserva EUA (publico, pode cair)."
+    },
+    {
+      "nome": "pathbit",
+      "proxy": "http://45.86.245.81:8080",
+      "usuario": "universal",
+      "descricao": "Sala oficial (fora do ar, failover automatico p/ reservas)."
     }
   ]
 }
