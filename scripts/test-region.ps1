@@ -12,7 +12,10 @@ foreach ($r in (Get-Regions)) {
     try {
         $t = Invoke-WebRequest -Uri "http://ip-api.com/json/?fields=status,country,query" -Proxy $r.proxy -TimeoutSec 60 -UseBasicParsing | ConvertFrom-Json
         if ($t.status -eq "success" -and $t.query) {
-            Write-Output ("OK    " + $r.nome + " => " + $t.query + " (" + $t.country + ")")
+            $kbps = Test-ProxySpeed ([string]$r.proxy)
+            $tag = "OK-stream"
+            if ($kbps -lt $ProxyMinKBps) { $tag = "LENTA p/ video" }
+            Write-Output ($tag + " " + $r.nome + " => " + $t.query + " (" + $t.country + ") " + [math]::Round($kbps,1) + " KB/s")
         } else {
             Write-Output ("FALHA " + $r.nome + " => proxy respondeu mas sem IP valido")
         }

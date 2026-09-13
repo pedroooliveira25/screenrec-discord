@@ -10,6 +10,9 @@ $RelayPort = 18081
 $ProxyTimeoutSec = 60
 $ProxyMaxRetries = 2
 $ProxyTestUrl = "http://ip-api.com/json/?fields=status,query"
+$ProxySpeedTestUrl = "https://speed.cloudflare.com/__down?bytes=300000"
+$ProxySpeedTimeoutSec = 20
+$ProxyMinKBps = 80
 
 function Get-Regions {
     if (-not (Test-Path -LiteralPath $ConfigFile)) { throw "Config não achada: $ConfigFile" }
@@ -168,6 +171,22 @@ function Test-LaunchUrl([string]$LaunchUrl, [int]$TimeoutSec = 0) {
     } catch { return $false }
 }
 
+# Velocidade real via proxy (KB/s). 0 = falhou/lenta. Teste de 100 bytes
+# (ip-api) passa até em proxy discada; video precisa de banda de verdade.
+function Test-ProxySpeed([string]$LaunchUrl, [int]$TimeoutSec = 0) {
+    if ($TimeoutSec -le 0) { $TimeoutSec = $ProxySpeedTimeoutSec }
+    try {
+        $tmp = Join-Path $env:TEMP "screenrec-spd.bin"
+        $t0 = Get-Date
+        Invoke-WebRequest -Uri $ProxySpeedTestUrl -Proxy $LaunchUrl -TimeoutSec $TimeoutSec -UseBasicParsing -OutFile $tmp | Out-Null
+        $dt = (Get-Date) - $t0
+        $len = (Get-Item -LiteralPath $tmp -ErrorAction SilentlyContinue).Length
+        try { Remove-Item -LiteralPath $tmp -Force -ErrorAction SilentlyContinue } catch { }
+        if ($dt.TotalSeconds -le 0 -or $len -le 0) { return 0 }
+        return ([double]$len / 1024.0 / $dt.TotalSeconds)
+    } catch { return 0 }
+}
+
 # Monitor: testa a sala ATIVA (via relay local se tem auth). $true = tudo bem.
 function Test-ActiveProxy([int]$TimeoutSec = 15) {
     $st = Get-State
@@ -190,6 +209,7 @@ function Start-RegionProxy {
     $first = $regions | Where-Object { $_.nome -eq $Regiao } | Select-Object -First 1
     if (-not $first) { throw "Região '$Regiao' não cadastrada em config/regions.json" }
     $ordered = @($first) + @($regions | Where-Object { $_.nome -ne $Regiao })
+    $slow = @()
     foreach ($cand in $ordered) {
         $proxy = [string]$cand.proxy
         $user = ""
@@ -199,14 +219,21 @@ function Start-RegionProxy {
             $launch = $proxy
             if ($user -ne "" -and $Pass -ne "") { $launch = Start-AuthRelay $proxy $user $Pass }
             if (Test-LaunchUrl $launch) {
-                # O relay de teste continua no ar: o Discord usa ele direto.
-                Start-DiscordWithProxy $launch
-                if ($SystemWide) { Set-SystemProxy $proxy }
-                Save-State ([string]$cand.nome) $proxy
-                return @{ Regiao = [string]$cand.nome; Proxy = $proxy; Trocou = ([string]$cand.nome -ne $Regiao) }
+                $kbps = Test-ProxySpeed $launch
+                if ($kbps -ge $ProxyMinKBps) {
+                    # O relay de teste continua no ar: o Discord usa ele direto.
+                    Start-DiscordWithProxy $launch
+                    if ($SystemWide) { Set-SystemProxy $proxy }
+                    Save-State ([string]$cand.nome) $proxy
+                    return @{ Regiao = [string]$cand.nome; Proxy = $proxy; Trocou = ([string]$cand.nome -ne $Regiao) }
+                }
+                $slow += ([string]$cand.nome + " (" + [math]::Round($kbps,1) + " KB/s)")
             }
         }
         Stop-AuthRelay
+    }
+    if ($slow.Count -gt 0) {
+        throw ("Proxy conecta mas lenta demais para video: " + ($slow -join ", ") + ". Minimo " + $ProxyMinKBps + " KB/s. Reviva o proxy privado/VPS ou cadastre uma reserva rapida.")
     }
     throw "Nenhum proxy respondeu em ${ProxyTimeoutSec}s (${ProxyMaxRetries}x cada). Adicione um reserva em config/regions.json."
 }

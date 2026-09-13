@@ -438,7 +438,7 @@ $monTimer.Add_Tick({
 $monTimer.Start()
 
 $lblFoot = New-Object System.Windows.Forms.Label
-$lblFoot.Text = "pathbit.com.br"
+$lblFoot.Text = "feito por pedro oliveira"
 $lblFoot.Font = New-Object System.Drawing.Font("Segoe UI", 8)
 $lblFoot.ForeColor = $ROXOHOV
 $lblFoot.Location = New-Object System.Drawing.Point(28, 534)
