@@ -59,14 +59,18 @@ function Start-DiscordClean {
 
 function Start-DiscordWithProxy([string]$ProxyUrl) {
     $exe = Get-DiscordExe
-    # Flag Chromium/Electron: todo o tráfego do Discord passa pelo proxy.
+    # Sinalizacao (API/regiao) passa pelo proxy para sair fora do BR.
+    # Midia pesada vai DIRETO para nao quebrar video/GoLive (erro 2012):
+    # mandar stream por proxy publico gratuito destroi a qualidade sem ganho,
+    # quem define a regiao e a API. Mesma tecnica do DiscordGoLiveBypass.
     $flag = "--proxy-server=$ProxyUrl"
+    $bypass = "--proxy-bypass-list=cdn.discordapp.com;*.discordapp.net;*.discord.media;*.storage.googleapis.com;<local>"
     Stop-Discord
     $wd = Split-Path -Parent $exe
     if ($exe -like "*Update.exe") {
-        Start-Process -FilePath $exe -ArgumentList "--processStart", "Discord.exe", "--", $flag -WorkingDirectory $wd
+        Start-Process -FilePath $exe -ArgumentList "--processStart", "Discord.exe", "--", $flag, $bypass -WorkingDirectory $wd
     } else {
-        Start-Process -FilePath $exe -ArgumentList $flag -WorkingDirectory $wd
+        Start-Process -FilePath $exe -ArgumentList $flag, $bypass -WorkingDirectory $wd
     }
 }
 
